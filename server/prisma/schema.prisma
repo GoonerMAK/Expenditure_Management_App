@@ -8,19 +8,21 @@ datasource db {
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  role_name   String       @unique
-  permissions Permission[] @relation("RolePermissions")
-  users       User[]
+  id            String      @id @default(uuid())
+  role_name     String      @unique
+  permissions   Permission? @relation(fields: [permission_id], references: [id])
+  permission_id String?     @unique
+  users         User[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model Permission {
-  id              String @id @default(uuid())
+  id              String  @id @default(uuid())
   permission_name String
-  roles           Role[] @relation("RolePermissions")
+  roles           Role[]
+  role_id         String? @unique
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

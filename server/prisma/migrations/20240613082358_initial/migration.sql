@@ -2,6 +2,7 @@
 CREATE TABLE "Role" (
     "id" TEXT NOT NULL,
     "role_name" TEXT NOT NULL,
+    "permission_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -12,6 +13,7 @@ CREATE TABLE "Role" (
 CREATE TABLE "Permission" (
     "id" TEXT NOT NULL,
     "permission_name" TEXT NOT NULL,
+    "role_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -75,14 +77,14 @@ CREATE TABLE "FinancialData" (
     CONSTRAINT "FinancialData_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "_RolePermissions" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "Role_role_name_key" ON "Role"("role_name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Role_permission_id_key" ON "Role"("permission_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Permission_role_id_key" ON "Permission"("role_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
@@ -96,11 +98,8 @@ CREATE UNIQUE INDEX "Category_category_name_key" ON "Category"("category_name");
 -- CreateIndex
 CREATE UNIQUE INDEX "Project_project_name_key" ON "Project"("project_name");
 
--- CreateIndex
-CREATE UNIQUE INDEX "_RolePermissions_AB_unique" ON "_RolePermissions"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_RolePermissions_B_index" ON "_RolePermissions"("B");
+-- AddForeignKey
+ALTER TABLE "Role" ADD CONSTRAINT "Role_permission_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "Permission"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -113,9 +112,3 @@ ALTER TABLE "Project" ADD CONSTRAINT "Project_created_by_id_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "FinancialData" ADD CONSTRAINT "FinancialData_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "Project"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_RolePermissions" ADD CONSTRAINT "_RolePermissions_A_fkey" FOREIGN KEY ("A") REFERENCES "Permission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_RolePermissions" ADD CONSTRAINT "_RolePermissions_B_fkey" FOREIGN KEY ("B") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
