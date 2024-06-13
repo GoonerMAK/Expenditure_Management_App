@@ -6,3 +6,78 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Role {
+  id          String       @id @default(uuid())
+  role_name   String       @unique
+  permissions Permission[] @relation("RolePermissions")
+  users       User[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Permission {
+  id              String @id @default(uuid())
+  permission_name String
+  roles           Role[] @relation("RolePermissions")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model User {
+  id          String    @id @default(uuid())
+  username    String    @unique
+  password    String
+  email       String    @unique
+  name        String
+  age         String?
+  gender      String?
+  nationality String?
+  role        Role      @relation(fields: [role_id], references: [id])
+  role_id     String
+  projects    Project[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Category {
+  id            String    @id @default(uuid())
+  category_name String    @unique
+  projects      Project[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Project {
+  id             String          @id @default(uuid())
+  project_name   String          @unique
+  description    String?
+  category       Category        @relation(fields: [category_id], references: [id])
+  category_id    String
+  start_date     DateTime?
+  end_date       DateTime?
+  created_by     User            @relation(fields: [created_by_id], references: [id])
+  created_by_id  String
+  financial_data FinancialData[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model FinancialData {
+  id             String  @id @default(uuid())
+  year           Int
+  month          Int
+  expenditure    Float?
+  initial_budget Float?
+  revised_budget Float?
+  project_id     String
+  project        Project @relation(fields: [project_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
