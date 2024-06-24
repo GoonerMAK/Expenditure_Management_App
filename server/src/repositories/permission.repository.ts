@@ -1,11 +1,15 @@
 import prisma from '../db.js';
 import { Permission } from '@prisma/client';
 
-export const createPermission = async (permission_name: string) => {
+export const createPermission = async (permission_name: string, role_id?: string) => {
+    const data: any = { permission_name };
+
+    if (role_id) {
+        data.roles = { connect: { id: role_id } };
+    }
+
     return await prisma.permission.create({
-        data: {
-            permission_name,
-        },
+        data,
     });
 };
 

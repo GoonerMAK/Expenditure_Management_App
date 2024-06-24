@@ -16,7 +16,11 @@ export const createFinancialData = async (
             expenditure,
             initial_budget,
             revised_budget,
-            project_id,
+            project: {
+                connect:{
+                    id: project_id
+                }
+            }
         },
     });
 };

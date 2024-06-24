@@ -13,10 +13,18 @@ export const createProject = async (
         data: {
             project_name,
             description,
-            category_id,
             start_date,
             end_date,
-            created_by_id,
+            created_by:{
+                connect:{
+                    id:created_by_id
+                }
+            },
+            category: {
+                connect: {
+                    id: category_id
+                }
+            }
         },
     });
 };

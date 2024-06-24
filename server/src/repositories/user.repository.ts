@@ -18,10 +18,14 @@ export const createUser = async (
             password,
             email,
             name,
-            role_id,
             age,
             gender,
             nationality,
+            role: {
+                connect: {
+                    id: role_id
+                }
+            }
         },
     });
 };
