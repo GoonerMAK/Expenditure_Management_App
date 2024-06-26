@@ -1,5 +1,8 @@
+import bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import * as userRepository from '../repositories/user.repository.js';
+
+const salt = 10;
 
 export const createUser = async (
     username: string,
@@ -12,7 +15,20 @@ export const createUser = async (
     nationality?: string
 ) => {
     try {
-        const user = await userRepository.createUser(username, password, email, name, role_id, age, gender, nationality);
+        const existingUserByUsername = await userRepository.getUserByUsername(username);
+        const existingUserByEmail = await userRepository.getUserByEmail(email);
+
+        if (existingUserByUsername) {
+            throw new Error('Username already exists');
+        }
+
+        if (existingUserByEmail) {
+            throw new Error('Email already exists');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const user = await userRepository.createUser(username, hashedPassword, email, name, role_id, age, gender, nationality);
         return user;
     } catch (error) {
         throw new Error(`Failed to create user: ${error}`);
@@ -31,10 +47,22 @@ export const updateUser = async (
     nationality?: string
 ) => {
     try {
-        const updatedUser = await userRepository.updateUser(id, username, password, email, name, role_id, age, gender, nationality);
+        const data: any = {};
+        if (username !== undefined) data.username = username;
+        if (password !== undefined) data.password = await bcrypt.hash(password, salt);
+        if (email !== undefined) data.email = email;
+        if (name !== undefined) data.name = name;
+        if (role_id !== undefined) data.role_id = role_id;
+        if (age !== undefined) data.age = age;
+        if (gender !== undefined) data.gender = gender;
+        if (nationality !== undefined) data.nationality = nationality;
+
+        const updatedUser = await userRepository.updateUser(id, data);
+
         if (!updatedUser) {
             throw new Error(`User with id ${id} not found`);
         }
+
         return updatedUser;
     } catch (error) {
         throw new Error(`Failed to update user: ${error}`);
