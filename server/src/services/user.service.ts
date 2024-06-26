@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import * as userRepository from '../repositories/user.repository.js';
 
-const salt = 10;
+const salt = bcrypt.genSalt();
 
 export const createUser = async (
     username: string,
