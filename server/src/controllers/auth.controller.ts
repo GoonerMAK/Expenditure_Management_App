@@ -16,8 +16,11 @@ export const logIn = async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     try {
-        const result = await authService.logIn(email, password);
-        res.status(200).json(result);
+        const { user, token } = await authService.logIn(email, password);
+
+        res.cookie('jwt', token, { httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000, });
+
+        res.status(200).json({user});
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
