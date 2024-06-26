@@ -38,7 +38,7 @@ model User {
   gender      String?
   nationality String?
   role        Role?     @relation(fields: [role_id], references: [id])
-  role_id     String
+  role_id     String?
   projects    Project[]
 
   created_at DateTime @default(now())
