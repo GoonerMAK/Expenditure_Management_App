@@ -1,20 +1,25 @@
-import express from "express"
-import categoryRoutes from './routes/category.route.js';
-import financialDataRoutes from './routes/financial-data.route.js';
-import permissionRoutes from './routes/permission.route.js';
-import projectRoutes from './routes/project.route.js';
-import roleRoutes from './routes/role.route.js'
-import userRoutes from './routes/user.route.js'
+import express from "express";
+import cookieParser from 'cookie-parser';
+
+import { categoryRouter } from './routes/category.route.js';
+import { financialDataRouter } from './routes/financial-data.route.js';
+import { permissionRouter } from './routes/permission.route.js';
+import { projectRouter } from './routes/project.route.js';
+import { roleRouter } from './routes/role.route.js'
+import { userRouter } from './routes/user.route.js'
+import { authRouter }  from './routes/auth.routes.js'; 
 
 const app = express()
 app.use(express.json());
+app.use(cookieParser());
 
-app.use('/api', categoryRoutes);
-app.use('/api', financialDataRoutes);
-app.use('/api', permissionRoutes);
-app.use('/api', projectRoutes);
-app.use('/api', roleRoutes);
-app.use('/api', userRoutes);
+app.use('/api', categoryRouter);
+app.use('/api', financialDataRouter);
+app.use('/api', permissionRouter);
+app.use('/api', projectRouter);
+app.use('/api', roleRouter);
+app.use('/api', userRouter);
+app.use('/api/auth', authRouter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
