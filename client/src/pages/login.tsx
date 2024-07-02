@@ -1,0 +1,85 @@
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      navigate('/dashboard');
+    } catch (error: any) {
+      setError(error.response?.data?.message || error.message);
+    }
+  };
+
+  return (
+    <div className="w-full flex items-center justify-center py-12 mt-20">
+      <div className="mx-auto grid w-[350px] gap-6">
+        <div className="grid gap-3 text-center">
+          <h1 className="text-3xl font-bold">Login</h1>
+          <p className="text-balance text-muted-foreground">
+            Enter your email below to login to your account
+          </p>
+        </div>
+        
+        {error && <p className="text-red-500">{error}</p>}
+
+        <form onSubmit={handleLogin} className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="something@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                to="/forgot-password"
+                className="ml-auto inline-block text-sm underline"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+        </form>
+
+        <div className="mt-0 text-center text-sm">
+          Don't have an account?{' '}
+          <Link to="/signup" className="underline">
+            Sign up
+          </Link>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default Login;
