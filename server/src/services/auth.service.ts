@@ -48,10 +48,23 @@ export const logIn = async (
             throw new Error(`Wrong Password`);
         }
 
-        const token = jwt.sign( { id: user.id, email: user.email }, process.env.SECRET, { expiresIn: '3d' } );
+        const token = jwt.sign( { id: user.id }, process.env.SECRET, { expiresIn: '3d' } );
 
         return { user, token };
     } catch (error) {
         throw new Error(`Failed to sign in: ${error.message}`);
     }
 };
+
+
+export const getAuthenticatedUser = async (
+    userId: string
+) => {
+    try {
+      const user = await authRepository.getUserById(userId);
+
+      return user;
+    } catch (error) {
+      throw new Error('Failed to get user information');
+    }
+  };
