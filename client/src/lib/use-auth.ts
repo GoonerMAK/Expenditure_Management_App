@@ -1,0 +1,27 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const useAuth = () => {
+  const [user, setUser] = useState<any>(null); 
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/auth/user', { withCredentials: true });
+        console.log('Testing custom hook useAuth:', response.data.user);
+
+        setUser(response.data.user);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  return { user, loading };
+};
+
+export default useAuth;
