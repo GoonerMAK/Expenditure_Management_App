@@ -6,6 +6,7 @@ import { Label } from "../components/ui/label";
 import axios from 'axios';
 import { jwtDecode, JwtPayload } from 'jwt-decode'; 
 import Cookies from 'js-cookie';
+import useAuth from '../lib/use-auth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [user, setUser] = useState('');
   const navigate = useNavigate();
+  const { user: authenticatedUser } = useAuth();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -29,6 +31,10 @@ const Login = () => {
       setError(error.response?.data?.message || error.message);
     }
   };
+
+  if (authenticatedUser) {
+    navigate('/dashboard');
+  }
 
   return (
     <div className="w-full flex items-center justify-center py-12 mt-20">
