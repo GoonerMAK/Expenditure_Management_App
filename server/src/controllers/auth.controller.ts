@@ -35,3 +35,14 @@ export const getAuthenticatedUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const logOut = async (req: Request, res: Response) => {
+  try {
+      await authService.logOut();
+      res.clearCookie('jwt', { httpOnly: true, sameSite: 'strict', secure: true  });
+      res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
+};

@@ -67,4 +67,13 @@ export const getAuthenticatedUser = async (
     } catch (error) {
       throw new Error('Failed to get user information');
     }
-  };
+};
+
+
+export const logOut = async () => {
+    try {
+        return { message: 'Logged out fully' };
+    } catch (error) {
+        throw new Error('Failed to log out');
+    }
+};
