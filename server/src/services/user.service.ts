@@ -10,6 +10,7 @@ export const createUser = async (
     email: string,
     name: string,
     role_id: string,
+    role_name: string,
     age?: string,
     gender?: string,
     nationality?: string
@@ -28,7 +29,7 @@ export const createUser = async (
 
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await userRepository.createUser(username, hashedPassword, email, name, role_id, age, gender, nationality);
+        const user = await userRepository.createUser(username, hashedPassword, email, name, role_id, role_name, age, gender, nationality);
         return user;
     } catch (error) {
         throw new Error(`Failed to create user: ${error}`);
@@ -42,6 +43,7 @@ export const updateUser = async (
     email?: string,
     name?: string,
     role_id?: string,
+    role_name?: string,
     age?: string,
     gender?: string,
     nationality?: string
@@ -53,6 +55,7 @@ export const updateUser = async (
         if (email !== undefined) data.email = email;
         if (name !== undefined) data.name = name;
         if (role_id !== undefined) data.role_id = role_id;
+        if (role_name !== undefined) data.role_name = role_name;
         if (age !== undefined) data.age = age;
         if (gender !== undefined) data.gender = gender;
         if (nationality !== undefined) data.nationality = nationality;
@@ -65,7 +68,7 @@ export const updateUser = async (
 
         return updatedUser;
     } catch (error) {
-        throw new Error(`Failed to update user: ${error}`);
+        throw new Error(`Failed to update user:  ${error.message}`);
     }
 };
 
