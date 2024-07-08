@@ -4,11 +4,13 @@ import prisma from '../db.js';
 export const signUp = async (
     email: string,
     password: string,
+    username: string,
 ) => {
     return await prisma.user.create({
         data: {
             email,
             password,
+            username,
         },
     });
 };
