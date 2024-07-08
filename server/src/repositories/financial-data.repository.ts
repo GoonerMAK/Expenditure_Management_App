@@ -7,7 +7,8 @@ export const createFinancialData = async (
     expenditure?: number,
     initial_budget?: number,
     revised_budget?: number,
-    project_id?: string
+    project_id?: string,
+    project_name?: string,
 ) => {
     return await prisma.financialData.create({
         data: {
@@ -16,6 +17,7 @@ export const createFinancialData = async (
             expenditure,
             initial_budget,
             revised_budget,
+            project_name,
             project: {
                 connect:{
                     id: project_id
@@ -26,13 +28,14 @@ export const createFinancialData = async (
 };
 
 export const updateFinancialData = async (
-    id: string,
+    id?: string,
     year?: number,
     month?: number,
     expenditure?: number,
     initial_budget?: number,
     revised_budget?: number,
-    project_id?: string
+    project_id?: string,
+    project_name?: string,
 ) => {
     const data: any = {};
     if (year !== undefined) data.year = year;
@@ -41,9 +44,14 @@ export const updateFinancialData = async (
     if (initial_budget !== undefined) data.initial_budget = initial_budget;
     if (revised_budget !== undefined) data.revised_budget = revised_budget;
     if (project_id !== undefined) data.project_id = project_id;
+    if (project_name !== undefined) data.project_name = project_name;
+
+    const financialData = await prisma.financialData.findFirst({
+        where: { project_id: id },
+    });
 
     return await prisma.financialData.update({
-        where: { id },
+        where: { id: financialData.id },
         data,
     });
 };
@@ -59,7 +67,7 @@ export const getAllFinancialData = async () => {
 };
 
 export const getFinancialDataById = async (id: string) => {
-    return await prisma.financialData.findUnique({
-        where: { id },
+    return await prisma.financialData.findFirst({
+        where: { project_id: id },
     });
 };
