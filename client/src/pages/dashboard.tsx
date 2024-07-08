@@ -1,6 +1,6 @@
 import Sidebar from '../components/sidebar';
 import Header from '../components/header';
-import ShowProjects from '../components/show-projects';
+import MultipleProjectsCard from '../components/multiple-projects-card';
 
 
 const Dashboard = () => {
@@ -10,7 +10,7 @@ const Dashboard = () => {
       <Sidebar/>
       <div className="flex flex-col">
         <Header/>
-        <ShowProjects/>
+        <MultipleProjectsCard/>
       </div>
     </div>
   );
