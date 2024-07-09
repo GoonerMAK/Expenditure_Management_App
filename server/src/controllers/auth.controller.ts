@@ -3,10 +3,10 @@ import * as authService from '../services/auth.service.js';
 import prisma from '../db.js';
 
 export const signUp = async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
 
     try {
-        const result = await authService.signUp(email, password);
+        const result = await authService.signUp(email, password, username);
         res.status(201).json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });

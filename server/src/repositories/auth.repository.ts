@@ -4,11 +4,21 @@ import prisma from '../db.js';
 export const signUp = async (
     email: string,
     password: string,
+    username: string,
 ) => {
+    const readOnlyRole = await prisma.role.findUnique({
+        where: {
+            role_name: "Read-only",
+        },
+    });
+
     return await prisma.user.create({
         data: {
             email,
             password,
+            username,
+            role_name: "Read-only",  
+            role: { connect: { id: readOnlyRole.id } }, 
         },
     });
 };

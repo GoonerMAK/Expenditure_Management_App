@@ -62,3 +62,23 @@ export const getUserById = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getAllUsernames = async (_req: Request, res: Response) => {
+    try {
+        const usernames = await userService.getAllUsernames();
+        res.status(200).json(usernames);
+    } catch (error) {
+        console.error('Error fetching usernames:', error);
+        res.status(500).json({ error: 'Failed to fetch usernames' });
+    }
+};
+
+export const getUsersWithoutRoles = async (_req: Request, res: Response) => {
+    try {
+        const getUsersWithoutRoles = await userService.getUsersWithoutRoles();
+        res.status(200).json(getUsersWithoutRoles);
+    } catch (error) {
+        console.error('Error fetching users without roles:', error);
+        res.status(500).json({ error: 'Failed to fetch users without roles'});
+    }
+}

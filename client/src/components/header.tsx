@@ -5,11 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useState } from 'react';
 import Cookies from 'js-cookie';
-
+import useAuth from '../lib/use-auth';
 
 const Header = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
+  const userName = user?.username;
+  
   const handleLogout = async () => {
     try {
       await axios.post('http://localhost:4000/api/auth/logout', {}, { withCredentials: true });
@@ -23,7 +26,7 @@ const Header = () => {
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6"> 
       <div className="flex-1 text-center">
-        Welcome Admin
+        Welcome {userName}
       </div>
 
       <DropdownMenu>

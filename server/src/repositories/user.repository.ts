@@ -30,6 +30,7 @@ export const createUser = async (
     });
 };
 
+
 export const updateUser = async (
     id: string,
     username?: string,
@@ -50,12 +51,33 @@ export const updateUser = async (
     if (age !== undefined) data.age = age;
     if (gender !== undefined) data.gender = gender;
     if (nationality !== undefined) data.nationality = nationality;
+    if (data.role_name) {
+        const role = await prisma.role.findUnique({
+            where: { role_name: data.role_name },
+        });
+        if (!role) {
+            throw new Error(`Role '${data.role_name}' not found`);
+        }
+        data.role_id = role.id;
+    }
+
+    if(data.role_name === "Read-only")
+    {
+        const role = await prisma.role.findUnique({
+            where: { role_name: data.role_name },
+        });
+        if (!role) {
+            throw new Error(`Role '${data.role_name}' not found`);
+        }
+        data.role_id = role.id;
+    }
 
     return await prisma.user.update({
         where: { id },
         data,
     });
 };
+
 
 export const deleteUser = async (id: string) => {
     return await prisma.user.delete({
@@ -83,4 +105,29 @@ export const getUserByEmail = async (email: string) => {
     return await prisma.user.findUnique({
         where: { email },
     });
+};
+
+export const getAllUsernames = async () => {
+    const users = await prisma.user.findMany({
+        select: {
+            id: true,
+            username: true,
+        },
+    });
+
+    return users.map(user => ({
+        id: user.id,
+        username: user.username,
+    }));
+};
+
+
+export const getUsersWithoutRoles = async () => {
+    const usersWithoutRoles = await prisma.user.findMany({
+      where: {
+        role: null,
+      },
+    });
+
+    return usersWithoutRoles;
 };
