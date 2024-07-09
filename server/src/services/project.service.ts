@@ -4,6 +4,7 @@ export const createProject = async (
     project_name: string,
     description?: string,
     category_id?: string,
+    category_name?: string,
     start_date?: Date,
     end_date?: Date,
     created_by_id?: string
@@ -13,6 +14,7 @@ export const createProject = async (
             project_name,
             description,
             category_id,
+            category_name,
             start_date,
             end_date,
             created_by_id
@@ -28,6 +30,7 @@ export const updateProject = async (
     project_name?: string,
     description?: string,
     category_id?: string,
+    category_name?: string,
     start_date?: Date,
     end_date?: Date,
     created_by_id?: string
@@ -38,6 +41,7 @@ export const updateProject = async (
             project_name,
             description,
             category_id,
+            category_name,
             start_date,
             end_date,
             created_by_id

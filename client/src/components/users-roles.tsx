@@ -96,6 +96,7 @@ const UserRoles = () => {
       id: '',
       username: '',
       role_name: '',
+
     },
     mode: 'onSubmit',
   });
@@ -139,6 +140,7 @@ const UserRoles = () => {
         setUsernames(response.data);
       } catch (error) {
         console.error('Failed to fetch usernames:', error);
+
       }
     };
 
@@ -192,6 +194,7 @@ const UserRoles = () => {
       const response = await axios.post('http://localhost:4000/api/roles', data, { withCredentials: true });
       console.log('Server response:', response.data);
       setRoles(prevRoles => [...prevRoles, response.data]);
+
 
       toast.success('Successfully created Role');
       setTimeout(() => {
@@ -267,6 +270,7 @@ const UserRoles = () => {
           <form onSubmit={addRoleForm.handleSubmit(onAddRoleSubmit)} className="flex-col space-y-6">
             <FormField
               control={addRoleForm.control}
+
               name="role_name"
               rules={{ required: 'Role name is required', minLength: { value: 2, message: 'Role name must be at least two character long' } }}
               render={({ field }) => (
@@ -582,7 +586,6 @@ const UserRoles = () => {
 
 
     </div>
-
 
   );
 };

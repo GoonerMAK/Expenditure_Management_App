@@ -1,9 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './pages/login';
 import Dashboard from './pages/dashboard';
+import Role from './pages/roles';
+import AddCategory from './pages/add-category';
+import AddFinancial from './pages/add-financial';
+import AddProject from './pages/add-project';
+import UpdateProject from './pages/update-project';
 import { Signup } from './pages/signup';
 import ProtectedRoute from './components/protected-route';
 import GuestRoute from './components/guest-route';
+
 
 function App() {
   return (
@@ -20,6 +26,7 @@ function App() {
             <Route path="/add-financial-info" element={<ProtectedRoute allowedRoles={['Contributor', 'Administrator']}><AddFinancial /></ProtectedRoute>} />
           </Routes>
       </Router>
+      
   );
 }
 

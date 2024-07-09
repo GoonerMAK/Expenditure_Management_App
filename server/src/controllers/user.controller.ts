@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import * as userService from '../services/user.service.js';
 
 export const createUser = async (req: Request, res: Response) => {
-    const { username, password, email, name, role_id, age, gender, nationality } = req.body;
+    const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body;
     try {
-        const newUser = await userService.createUser(username, password, email, name, role_id, age, gender, nationality);
+        const newUser = await userService.createUser(username, password, email, name, role_id, role_name, age, gender, nationality);
         res.status(201).json(newUser);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -13,9 +13,9 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { username, password, email, name, role_id, age, gender, nationality } = req.body;
+    const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body;
     try {
-        const updatedUser = await userService.updateUser(id, username, password, email, name, role_id, age, gender, nationality);
+        const updatedUser = await userService.updateUser(id, username, password, email, name, role_id, role_name, age, gender, nationality);
         if (!updatedUser) {
             res.status(404).json({ error: `User with id ${id} not found` });
         } else {

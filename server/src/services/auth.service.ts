@@ -14,9 +14,14 @@ export const signUp = async (
 ) => {
     try {
         const existingUserByEmail = await userRepository.getUserByEmail(email);
+        const existingUserByUsername = await userRepository.getUserByUsername(username);
 
         if (existingUserByEmail) {
             throw new Error('Email already exists');
+        }
+
+        if (existingUserByUsername) {
+            throw new Error('Username already exists');
         }
 
         const salt = await bcrypt.genSalt(10);

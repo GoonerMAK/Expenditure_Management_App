@@ -2,12 +2,13 @@ import { Request, Response } from 'express';
 import * as projectService from '../services/project.service.js';
 
 export const createProject = async (req: Request, res: Response) => {
-    const { project_name, description, category_id, start_date, end_date, created_by_id } = req.body;
+    const { project_name, description, category_id, category_name, start_date, end_date, created_by_id } = req.body;
     try {
         const newProject = await projectService.createProject(
             project_name,
             description,
             category_id,
+            category_name,
             start_date,
             end_date,
             created_by_id
@@ -20,13 +21,14 @@ export const createProject = async (req: Request, res: Response) => {
 
 export const updateProject = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { project_name, description, category_id, start_date, end_date, created_by_id } = req.body;
+    const { project_name, description, category_id, category_name, start_date, end_date, created_by_id } = req.body;
     try {
         const updatedProject = await projectService.updateProject(
             id,
             project_name,
             description,
             category_id,
+            category_name,
             start_date,
             end_date,
             created_by_id

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { useForm } from "react-hook-form";
+import axios from 'axios';
 import { format } from "date-fns"
 
 import { Check, ChevronsUpDown, CalendarIcon } from "lucide-react"
@@ -10,7 +9,6 @@ import { Button } from "../components/ui/button";
 import { Calendar } from './ui/calendar';
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
-import useAuth from '../lib/use-auth';
 
 import {
     Form,
@@ -38,18 +36,16 @@ import {
 } from "./ui/popover"
 
 
-
-interface Project {
-    id: string;
+interface ProjectFormValues {
     project_name: string;
     description: string;
     category_id: string;
     category_name: string;
-    start_date: string;
-    end_date: string;
+    start_date: Date;
+    end_date: Date;
     created_by_id: string;
-    created_at: string;
-    updated_at: string;
+    created_at: Date;
+    updated_at: Date;
 }
 
 interface Category {
@@ -59,73 +55,32 @@ interface Category {
     updated_at: string;
 }
 
-interface FinancialData {
-    year: number;
-    month: number;
-    expenditure: number;
-    initial_budget: number;
-    revised_budget: number;
-}
-
-
-const SingleProject = () => {
-    const { id } = useParams<{ id: string }>();
-    const [project, setProject] = useState<Project | null>(null);
-    const [financialData, setFinancialData] = useState<FinancialData | null>(null);
+const AddProjectForm = () => {
     const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [editMode, setEditMode] = useState(false);
     const [open, setOpen] = useState(false)
-    const { user } = useAuth();
 
-
-
-    const form = useForm<Project & FinancialData>({
+    const form = useForm<ProjectFormValues>({
         defaultValues: {
             project_name: '',
             description: '',
             category_id: '',
             category_name: '',
-            start_date: '',
-            end_date: '',
-            year: 0,
-            month: 0,
-            expenditure: 0,
-            initial_budget: 0,
-            revised_budget: 0,
-        }
+            start_date: new Date(),
+            end_date: new Date(),
+            created_by_id: '',
+            created_at: new Date(),
+            updated_at: new Date(),
+        },
     });
 
     const { setValue, watch } = form;
-
-
-    useEffect(() => {
-        const fetchProject = async () => {
-            try {
-                const response = await axios.get<Project>(`http://localhost:4000/api/projects/${id}`);
-                setProject(response.data);
-                form.reset({
-                    project_name: response.data.project_name,
-                    description: response.data.description,
-                    category_name: response.data.category_name, 
-                    start_date: new Date(response.data.start_date).toISOString(), 
-                    end_date: new Date(response.data.end_date).toISOString(), 
-                });
-            } catch (error) {
-                console.error('Failed to fetch project:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProject();
-    }, [id, form]);
-
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get<Category[]>('http://localhost:4000/api/categories', { withCredentials: true });
+                console.log('Fetched categories:', response.data);
+
                 setCategories(response.data);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -134,7 +89,6 @@ const SingleProject = () => {
 
         fetchCategories();
     }, []);
-
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
@@ -151,73 +105,31 @@ const SingleProject = () => {
     }, [setValue]);
 
 
-    useEffect(() => {
-        const fetchFinancialData = async () => {
-            try {
-                const response = await axios.get<FinancialData>(`http://localhost:4000/api/financialData/${id}`, { withCredentials: true });
-                setFinancialData(response.data);
-                form.reset({
-                    year: response.data.year,
-                    month: response.data.month,
-                    expenditure: response.data.expenditure, 
-                    initial_budget: response.data.initial_budget, 
-                    revised_budget: response.data.revised_budget, 
-                });
-            } catch (error) {
-                console.error('Failed to fetch financial data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFinancialData();
-    }, [id, form]);
-
-
-
-    const onSubmit = async (data: Project & FinancialData) => {
+    const onSubmit = async (data: ProjectFormValues) => {
         try {
-            await axios.put(`http://localhost:4000/api/projects/${id}`, data, { withCredentials: true });
+            const response = await axios.post('http://localhost:4000/api/projects', data, { withCredentials: true });
+            console.log('Server response:', response.data);
 
-            const financialDataToSend = {
-                year: parseInt(data.year.toString(), 10),
-                month: parseInt(data.month.toString(), 10),
-                expenditure: parseFloat(data.expenditure.toString()),
-                initial_budget: parseFloat(data.initial_budget.toString()),
-                revised_budget: parseFloat(data.revised_budget.toString())
-            };
-
-            console.log('Financial data being sent:', financialDataToSend);
-
-            await axios.put(`http://localhost:4000/api/financialData/${id}`, financialDataToSend, { withCredentials: true });
-
-            toast.success('Project updated successfully');
-
-        } catch (error) {
-            toast.error('Failed to update project');
+            toast.success("Project has been created")
+            setTimeout(() => {
+                window.location.reload();
+            }, 4000);
+        } catch (error: any) {
+            console.error('Error response:', error.response);
+            toast.error("Error creating project")
         }
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (!project) {
-        return <div>Project not found</div>;
-    }
-
     const startDate = watch("start_date");
-    const canEdit = user?.role_name !== "Read-only";
-
 
     return (
         <div className="flex space-x-6 p-12 ml-10">
             <Toaster />
             <div className="w-1/3">
-                {canEdit && <Button onClick={() => setEditMode(true)}>Edit</Button>}
+
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex-col space-y-6">
-                        
+
                         <FormField
                             control={form.control}
                             name="project_name"
@@ -225,7 +137,7 @@ const SingleProject = () => {
                                 <FormItem>
                                     <FormLabel>Project Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter project name" {...field} disabled={!editMode} />
+                                        <Input placeholder="Enter project name" {...field} />
                                     </FormControl>
                                     <FormDescription>
                                         This is the name of the project
@@ -247,7 +159,6 @@ const SingleProject = () => {
                                             placeholder="Enter Description"
                                             className="resize-none"
                                             {...field}
-                                            disabled={!editMode}
                                         />
                                     </FormControl>
                                     <FormDescription>
@@ -272,7 +183,6 @@ const SingleProject = () => {
                                                 role="combobox"
                                                 aria-expanded={open}
                                                 className="w-[200px] justify-between flex"
-                                                disabled={!editMode}
                                             >
                                                 {form.getValues("category_name") || "Select category"}
                                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -335,7 +245,6 @@ const SingleProject = () => {
                                                         "w-[240px] pl-3 text-left font-normal",
                                                         !field.value && "text-muted-foreground"
                                                     )}
-                                                    disabled={!editMode}
                                                 >
                                                     {field.value ? (
                                                         format(field.value, "PPP")
@@ -349,10 +258,9 @@ const SingleProject = () => {
                                         <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                                 mode="single"
-                                                selected={field.value ? new Date(field.value) : undefined} 
-                                                onSelect={(date) => field.onChange(date ? date.toISOString() : '')}
+                                                selected={field.value}
+                                                onSelect={field.onChange}
                                                 initialFocus
-                                                disabled={!editMode}
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -380,7 +288,6 @@ const SingleProject = () => {
                                                         "w-[240px] pl-3 text-left font-normal",
                                                         !field.value && "text-muted-foreground"
                                                     )}
-                                                    disabled={!editMode}
                                                 >
                                                     {field.value ? (
                                                         format(field.value, "PPP")
@@ -394,11 +301,10 @@ const SingleProject = () => {
                                         <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
                                                 mode="single"
-                                                selected={field.value ? new Date(field.value) : undefined} 
-                                                onSelect={(date) => field.onChange(date ? date.toISOString() : '')}
-                                                // modifiers={{ disabled: { before: startDate } }}
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                modifiers={{ disabled: { before: startDate } }}
                                                 initialFocus
-                                                disabled={!editMode}
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -411,98 +317,13 @@ const SingleProject = () => {
                             )}
                         />
 
-                        <FormField
-                            control={form.control}
-                            name="year"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Year</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" min="1900" {...field} disabled={!editMode} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter the year for financial data
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
-                        <FormField
-                            control={form.control}
-                            name="month"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Month</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" min="1" max="12" {...field} disabled={!editMode} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter the month for financial data (1 for January, 2 for February, etc.)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="expenditure"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Expenditure</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" step="0.01" {...field} disabled={!editMode} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter the expenditure amount (optional)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="initial_budget"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Initial Budget</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" step="0.01" {...field} disabled={!editMode} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter the initial budget amount (optional)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="revised_budget"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Revised Budget</FormLabel>
-                                    <FormControl>
-                                        <Input type="number" step="0.01" {...field} disabled={!editMode} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter the revised budget amount (optional)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    
-
-                        {editMode && <Button type="submit">Update</Button>}
+                        <Button type="submit"> Submit</Button>
                     </form>
                 </Form>
             </div>
-        </div>
+        </div >
     );
 };
 
-export default SingleProject;
+export default AddProjectForm;
