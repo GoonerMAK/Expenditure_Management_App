@@ -8,6 +8,7 @@ export const createUser = async (
     email: string,
     name: string,
     role_id: string,
+    role_name: string,
     age?: string,
     gender?: string,
     nationality?: string
@@ -21,6 +22,7 @@ export const createUser = async (
             age,
             gender,
             nationality,
+            role_name,
             role: {
                 connect: {
                     id: role_id
@@ -32,25 +34,18 @@ export const createUser = async (
 
 export const updateUser = async (
     id: string,
-    username?: string,
-    password?: string,
-    email?: string,
-    name?: string,
-    role_id?: string,
-    age?: string,
-    gender?: string,
-    nationality?: string
+    data: {
+        username?: string,
+        password?: string,
+        email?: string,
+        name?: string,
+        role_id?: string,
+        role_name?: string,
+        age?: string,
+        gender?: string,
+        nationality?: string
+    }
 ) => {
-    const data: any = {};
-    if (username !== undefined) data.username = username;
-    if (password !== undefined) data.password = password;
-    if (email !== undefined) data.email = email;
-    if (name !== undefined) data.name = name;
-    if (role_id !== undefined) data.role_id = role_id;
-    if (age !== undefined) data.age = age;
-    if (gender !== undefined) data.gender = gender;
-    if (nationality !== undefined) data.nationality = nationality;
-
     return await prisma.user.update({
         where: { id },
         data,

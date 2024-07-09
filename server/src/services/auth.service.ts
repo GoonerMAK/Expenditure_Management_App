@@ -10,18 +10,24 @@ dotenv.config();
 export const signUp = async (
     email: string,
     password: string,
+    username: string
 ) => {
     try {
         const existingUserByEmail = await userRepository.getUserByEmail(email);
+        const existingUserByUsername = await userRepository.getUserByUsername(username);
 
         if (existingUserByEmail) {
             throw new Error('Email already exists');
         }
 
+        if (existingUserByUsername) {
+            throw new Error('Username already exists');
+        }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await authRepository.signUp(email, hashedPassword);
+        const user = await authRepository.signUp(email, hashedPassword, username);
 
         return {user};
     } catch (error) {

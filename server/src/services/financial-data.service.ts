@@ -6,7 +6,8 @@ export const createFinancialData = async (
     expenditure?: number,
     initial_budget?: number,
     revised_budget?: number,
-    project_id?: string
+    project_id?: string,
+    project_name?: string,
 ) => {
     try {
         const financialData = await financialDataRepository.createFinancialData(
@@ -15,7 +16,8 @@ export const createFinancialData = async (
             expenditure,
             initial_budget,
             revised_budget,
-            project_id
+            project_id,
+            project_name
         );
         return financialData;
     } catch (error) {
@@ -24,13 +26,14 @@ export const createFinancialData = async (
 };
 
 export const updateFinancialData = async (
-    id: string,
+    id?: string,
     year?: number,
     month?: number,
     expenditure?: number,
     initial_budget?: number,
     revised_budget?: number,
-    project_id?: string
+    project_id?: string,
+    project_name?: string,
 ) => {
     try {
         const updatedFinancialData = await financialDataRepository.updateFinancialData(
@@ -40,7 +43,8 @@ export const updateFinancialData = async (
             expenditure,
             initial_budget,
             revised_budget,
-            project_id
+            project_id,
+            project_name,
         );
         if (!updatedFinancialData) {
             throw new Error(`Financial data with id ${id} not found`);

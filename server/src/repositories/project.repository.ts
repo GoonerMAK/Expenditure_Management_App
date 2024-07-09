@@ -5,6 +5,7 @@ export const createProject = async (
     project_name: string,
     description?: string,
     category_id?: string,
+    category_name?: string,
     start_date?: Date,
     end_date?: Date,
     created_by_id?: string
@@ -15,6 +16,7 @@ export const createProject = async (
             description,
             start_date,
             end_date,
+            category_name,
             created_by:{
                 connect:{
                     id:created_by_id
@@ -34,6 +36,7 @@ export const updateProject = async (
     project_name?: string,
     description?: string,
     category_id?: string,
+    category_name?: string,
     start_date?: Date,
     end_date?: Date,
     created_by_id?: string
@@ -42,6 +45,7 @@ export const updateProject = async (
     if (project_name !== undefined) data.project_name = project_name;
     if (description !== undefined) data.description = description;
     if (category_id !== undefined) data.category_id = category_id;
+    if (category_name !== undefined) data.category_name = category_name;
     if (start_date !== undefined) data.start_date = start_date;
     if (end_date !== undefined) data.end_date = end_date;
     if (created_by_id !== undefined) data.created_by_id = created_by_id;
