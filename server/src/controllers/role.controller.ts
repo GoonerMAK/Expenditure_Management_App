@@ -62,3 +62,34 @@ export const getRoleById = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+export const getUsersByRole = async (_req: Request, res: Response) => {
+    try {
+        const rolesWithUsers = await roleService.getUsersByRole();
+        res.status(200).json(rolesWithUsers);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+export const getUnassignedRolesByUserId = async (req: Request, res: Response) => {
+    const { id } = req.params; 
+    try {
+        const unassignedRoles = await roleService.getUnassignedRolesByUserId(id);
+        res.status(200).json(unassignedRoles);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getAssignedRolesByUserId = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const assignedRoles = await roleService.getAssignedRolesByUserId(id);
+        res.status(200).json(assignedRoles);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

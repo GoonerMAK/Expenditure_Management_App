@@ -10,7 +10,7 @@ dotenv.config();
 export const signUp = async (
     email: string,
     password: string,
-    username: string
+    username: string,
 ) => {
     try {
         const existingUserByEmail = await userRepository.getUserByEmail(email);

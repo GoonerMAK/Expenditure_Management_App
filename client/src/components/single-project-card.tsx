@@ -10,6 +10,7 @@ import { Button } from "../components/ui/button";
 import { Calendar } from './ui/calendar';
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
+import useAuth from '../lib/use-auth';
 
 import {
     Form,
@@ -75,6 +76,9 @@ const SingleProject = () => {
     const [loading, setLoading] = useState(true);
     const [editMode, setEditMode] = useState(false);
     const [open, setOpen] = useState(false)
+    const { user } = useAuth();
+
+
 
     const form = useForm<Project & FinancialData>({
         defaultValues: {
@@ -203,12 +207,14 @@ const SingleProject = () => {
     }
 
     const startDate = watch("start_date");
+    const canEdit = user?.role_name !== "Read-only";
+
 
     return (
         <div className="flex space-x-6 p-12 ml-10">
             <Toaster />
             <div className="w-1/3">
-                <Button onClick={() => setEditMode(true)}>Edit</Button>
+                {canEdit && <Button onClick={() => setEditMode(true)}>Edit</Button>}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex-col space-y-6">
                         

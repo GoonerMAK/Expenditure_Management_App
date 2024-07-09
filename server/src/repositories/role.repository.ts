@@ -37,3 +37,60 @@ export const getRoleById = async (id: string) => {
         where: { id },
     });
 };
+
+export const getUsersByRole = async () => {
+    const rolesWithUsers = await prisma.role.findMany({
+        include: {
+            users: true,
+        },
+    });
+
+    return rolesWithUsers.map(role => ({
+        role_name: role.role_name,
+        users: role.users,
+    }));
+};
+
+
+export const getUnassignedRolesByUserId = async (user_id: string) => {
+    const user = await prisma.user.findUnique({
+        where: { id: user_id },
+        select: { role_id: true } 
+    });
+
+    const unassignedRoles = await prisma.role.findMany({
+        where: {
+            NOT: {
+                id: user.role_id 
+            }
+        },
+        select: {
+            id: true,
+            role_name: true
+        }
+    });
+
+    return unassignedRoles;
+};
+
+
+export const getAssignedRolesByUserId = async (user_id: string) => {
+    const user = await prisma.user.findUnique({
+        where: { id: user_id },
+        include: {
+            role: {
+                where: {
+                    role_name: {
+                        not: 'Read-only' 
+                    }
+                },
+                select: {
+                    id: true,
+                    role_name: true,
+                },
+            },
+        },
+    });
+
+    return user?.role ?? [];
+};

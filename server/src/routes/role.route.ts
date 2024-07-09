@@ -9,4 +9,8 @@ roleRouter.put('/roles/:id', isAuthenticated, roleController.updateRole);
 roleRouter.delete('/roles/:id', isAuthenticated, roleController.deleteRole);
 roleRouter.get('/roles', roleController.getAllRoles);
 roleRouter.get('/roles/:id', roleController.getRoleById);
+roleRouter.get('/roles/users/by-role', roleController.getUsersByRole);
+roleRouter.get('/roles/unassigned/:id', roleController.getUnassignedRolesByUserId);
+roleRouter.get('/roles/assigned/:id', roleController.getAssignedRolesByUserId);
+
 

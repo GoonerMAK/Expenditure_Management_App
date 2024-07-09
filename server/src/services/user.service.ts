@@ -104,3 +104,21 @@ export const getUserById = async (id: string) => {
         throw new Error(`Failed to fetch user: ${error}`);
     }
 };
+
+export const getAllUsernames = async () => {
+    try {
+        const usernames = await userRepository.getAllUsernames();
+        return usernames;
+    } catch (error) {
+        throw new Error(`Failed to fetch usernames: ${error.message}`);
+    }
+};
+
+export const getUsersWithoutRoles = async () => {
+    try {
+        const usersWithoutRoles = await userRepository.getUsersWithoutRoles();
+        return usersWithoutRoles;
+    } catch (error) {
+        throw new Error(`Failed to fetch users: ${error.message}`);
+    }
+}
