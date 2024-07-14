@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/user.service.js';
+import { UserCreate, UserUpdate } from '../validators/user.validator.js';
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request<unknown, unknown, UserCreate>, res: Response) => {
     const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body;
     try {
         const newUser = await userService.createUser(username, password, email, name, role_id, role_name, age, gender, nationality);
@@ -11,9 +12,9 @@ export const createUser = async (req: Request, res: Response) => {
     }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request<{id: string}, unknown, UserUpdate>, res: Response) => {
     const { id } = req.params;
-    const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body;
+    const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body.data;
     try {
         const updatedUser = await userService.updateUser(id, username, password, email, name, role_id, role_name, age, gender, nationality);
         if (!updatedUser) {

@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as financialDataService from '../services/financial-data.service.js';
+import { FinancialData } from '../validators/financial-data.validator.js';
 
-export const createFinancialData = async (req: Request, res: Response) => {
+export const createFinancialData = async (req: Request<unknown, unknown, FinancialData>, res: Response) => {
     const { year, month, expenditure, initial_budget, revised_budget, project_id, project_name } = req.body;
     try {
         const financialData = await financialDataService.createFinancialData(year, month, expenditure, initial_budget, revised_budget, project_id, project_name);
@@ -11,7 +12,7 @@ export const createFinancialData = async (req: Request, res: Response) => {
     }
 };
 
-export const updateFinancialData = async (req: Request, res: Response) => {
+export const updateFinancialData = async (req: Request<{id: string}, unknown, FinancialData>, res: Response) => {
     const { id } = req.params;
     const { year, month, expenditure, initial_budget, revised_budget, project_id, project_name } = req.body;
     try {

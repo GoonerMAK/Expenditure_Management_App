@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import * as authController from '../controllers/auth.controller.js';
-import { isAuthenticated } from '../middlewares/auth.middleware.js';
+import { isAuthenticated} from '../middlewares/auth.middleware.js';
+import { validateRequest } from '../middlewares/validator.middleware.js';
+import { authLoginSchema, authSignUpSchema } from '../validators/auth.validator.js';
 
 export const authRouter = Router();
 
-authRouter.post('/signup', authController.signUp);
-authRouter.post('/login', authController.logIn);
+authRouter.post('/signup', validateRequest(authSignUpSchema), authController.signUp);
+authRouter.post('/login', validateRequest(authLoginSchema), authController.logIn);
 authRouter.post('/logout', authController.logOut);
 authRouter.get('/user', isAuthenticated, authController.getAuthenticatedUser);

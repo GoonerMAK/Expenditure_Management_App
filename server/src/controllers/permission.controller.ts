@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as permissionService from '../services/permission.service.js';
+import { Permission } from '../validators/permission.validator.js';
 
-export const createPermission = async (req: Request, res: Response) => {
+export const createPermission = async (req: Request<unknown, unknown, Permission>, res: Response) => {
     const { permission_name } = req.body;
     try {
         const newPermission = await permissionService.createPermission(permission_name);
@@ -11,7 +12,7 @@ export const createPermission = async (req: Request, res: Response) => {
     }
 };
 
-export const updatePermission = async (req: Request, res: Response) => {
+export const updatePermission = async (req: Request<{id: string}, unknown, Permission>, res: Response) => {
     const { id } = req.params;
     const { permission_name } = req.body;
     try {

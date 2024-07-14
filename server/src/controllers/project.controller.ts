@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as projectService from '../services/project.service.js';
+import { Project } from '../validators/project.validator.js';
 
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (req: Request<unknown, unknown, Project>, res: Response) => {
     const { project_name, description, category_id, category_name, start_date, end_date, created_by_id } = req.body;
     try {
         const newProject = await projectService.createProject(
@@ -19,7 +20,7 @@ export const createProject = async (req: Request, res: Response) => {
     }
 };
 
-export const updateProject = async (req: Request, res: Response) => {
+export const updateProject = async (req: Request<{id: string}, unknown, Project>, res: Response) => {
     const { id } = req.params;
     const { project_name, description, category_id, category_name, start_date, end_date, created_by_id } = req.body;
     try {

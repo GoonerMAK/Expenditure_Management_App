@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as roleService from '../services/role.service.js';
+import { Role } from '../validators/role.validator.js';
 
-export const createRole = async (req: Request, res: Response) => {
+export const createRole = async (req: Request<unknown, unknown, Role>, res: Response) => {
     const { role_name } = req.body;
     try {
         const newRole = await roleService.createRole(role_name);
@@ -11,7 +12,7 @@ export const createRole = async (req: Request, res: Response) => {
     }
 };
 
-export const updateRole = async (req: Request, res: Response) => {
+export const updateRole = async (req: Request<{id: string}, unknown, Role>, res: Response) => {
     const { id } = req.params;
     const { role_name } = req.body;
     try {
