@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import * as roleService from '../services/role.service.js';
-import { Role } from '../validators/role.validator.js';
+import { Role, RoleParams } from '../validators/role.validator.js';
 
-export const createRole = async (req: Request<unknown, unknown, Role>, res: Response) => {
+export const createRole = async (req: Request<RoleParams, unknown, Role, unknown>, res: Response) => {
     const { role_name } = req.body;
     try {
         const newRole = await roleService.createRole(role_name);
@@ -12,7 +12,7 @@ export const createRole = async (req: Request<unknown, unknown, Role>, res: Resp
     }
 };
 
-export const updateRole = async (req: Request<{id: string}, unknown, Role>, res: Response) => {
+export const updateRole = async (req: Request<RoleParams, unknown, Role, unknown>, res: Response) => {
     const { id } = req.params;
     const { role_name } = req.body;
     try {
@@ -27,7 +27,7 @@ export const updateRole = async (req: Request<{id: string}, unknown, Role>, res:
     }
 };
 
-export const deleteRole = async (req: Request, res: Response) => {
+export const deleteRole = async (req: Request<RoleParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const deletedRole = await roleService.deleteRole(id);
@@ -41,7 +41,7 @@ export const deleteRole = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllRoles = async (_req: Request, res: Response) => {
+export const getAllRoles = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const roles = await roleService.getAllRoles();
         res.status(200).json(roles);
@@ -50,7 +50,7 @@ export const getAllRoles = async (_req: Request, res: Response) => {
     }
 };
 
-export const getRoleById = async (req: Request, res: Response) => {
+export const getRoleById = async (req: Request<RoleParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const role = await roleService.getRoleById(id);
@@ -65,7 +65,7 @@ export const getRoleById = async (req: Request, res: Response) => {
 };
 
 
-export const getUsersByRole = async (_req: Request, res: Response) => {
+export const getUsersByRole = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const rolesWithUsers = await roleService.getUsersByRole();
         res.status(200).json(rolesWithUsers);
@@ -75,7 +75,7 @@ export const getUsersByRole = async (_req: Request, res: Response) => {
 };
 
 
-export const getUnassignedRolesByUserId = async (req: Request, res: Response) => {
+export const getUnassignedRolesByUserId = async (req: Request<RoleParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params; 
     try {
         const unassignedRoles = await roleService.getUnassignedRolesByUserId(id);
@@ -85,7 +85,7 @@ export const getUnassignedRolesByUserId = async (req: Request, res: Response) =>
     }
 };
 
-export const getAssignedRolesByUserId = async (req: Request, res: Response) => {
+export const getAssignedRolesByUserId = async (req: Request<RoleParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const assignedRoles = await roleService.getAssignedRolesByUserId(id);

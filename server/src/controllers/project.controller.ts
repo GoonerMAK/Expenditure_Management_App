@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import * as projectService from '../services/project.service.js';
-import { Project } from '../validators/project.validator.js';
+import { Project, ProjectParams } from '../validators/project.validator.js';
 
-export const createProject = async (req: Request<unknown, unknown, Project>, res: Response) => {
+export const createProject = async (req: Request<unknown, unknown, Project, unknown>, res: Response) => {
     const { project_name, description, category_id, category_name, start_date, end_date, created_by_id } = req.body;
     try {
         const newProject = await projectService.createProject(
@@ -20,7 +20,7 @@ export const createProject = async (req: Request<unknown, unknown, Project>, res
     }
 };
 
-export const updateProject = async (req: Request<{id: string}, unknown, Project>, res: Response) => {
+export const updateProject = async (req: Request<ProjectParams, unknown, Project, unknown>, res: Response) => {
     const { id } = req.params;
     const { project_name, description, category_id, category_name, start_date, end_date, created_by_id } = req.body;
     try {
@@ -44,7 +44,7 @@ export const updateProject = async (req: Request<{id: string}, unknown, Project>
     }
 };
 
-export const deleteProject = async (req: Request, res: Response) => {
+export const deleteProject = async (req: Request<ProjectParams, unknown, Project, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const deletedProject = await projectService.deleteProject(id);
@@ -58,7 +58,7 @@ export const deleteProject = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllProjects = async (_req: Request, res: Response) => {
+export const getAllProjects = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const projects = await projectService.getAllProjects();
         res.status(200).json(projects);
@@ -67,7 +67,7 @@ export const getAllProjects = async (_req: Request, res: Response) => {
     }
 };
 
-export const getProjectById = async (req: Request, res: Response) => {
+export const getProjectById = async (req: Request<ProjectParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const project = await projectService.getProjectById(id);

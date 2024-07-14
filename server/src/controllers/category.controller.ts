@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import * as categoryService from '../services/category.service.js';
-import { Category } from '../validators/category.validator.js';
+import { Category, CategoryParams } from '../validators/category.validator.js';
 
-export const createCategory = async (req: Request<unknown, unknown, Category>, res: Response) => {
+export const createCategory = async (req: Request<unknown, unknown, Category, unknown>, res: Response) => {
     const { category_name } = req.body;
     try {
         const category = await categoryService.createCategory(category_name);
@@ -12,7 +12,7 @@ export const createCategory = async (req: Request<unknown, unknown, Category>, r
     }
 };
 
-export const updateCategory = async (req: Request<{ id: string }, unknown, Category>, res: Response) => {
+export const updateCategory = async (req: Request<CategoryParams, unknown, Category, unknown>, res: Response) => {
     const { id } = req.params;
     const { category_name } = req.body;
     try {
@@ -27,7 +27,7 @@ export const updateCategory = async (req: Request<{ id: string }, unknown, Categ
     }
 };
 
-export const deleteCategory = async (req: Request, res: Response) => {
+export const deleteCategory = async (req: Request<CategoryParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const deletedCategory = await categoryService.deleteCategory(id);
@@ -41,7 +41,7 @@ export const deleteCategory = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllCategories = async (_req: Request, res: Response) => {
+export const getAllCategories = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const categories = await categoryService.getAllCategories();
         res.status(200).json(categories);
@@ -50,7 +50,7 @@ export const getAllCategories = async (_req: Request, res: Response) => {
     }
 };
 
-export const getCategoryById = async (req: Request, res: Response) => {
+export const getCategoryById = async (req: Request<CategoryParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const category = await categoryService.getCategoryById(id);
