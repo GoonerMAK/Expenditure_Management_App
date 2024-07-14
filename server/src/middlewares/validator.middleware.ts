@@ -10,3 +10,14 @@ export const validateRequest = (schema: ZodSchema) => async (req: Request, res: 
         res.status(400).json({ message: error.errors[0].message });
     }
 };
+
+
+export const validateParams = (schema: ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const parsedParams = await schema.parseAsync(req.params);
+        req.params = parsedParams;
+        next();
+    } catch (error) {
+        res.status(400).json({ message: error.errors[0].message });
+    }
+};

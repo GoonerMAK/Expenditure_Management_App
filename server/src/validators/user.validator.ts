@@ -3,6 +3,10 @@ import { z } from "zod";
 const genderEnum = z.enum(["Male", "Female", "Other"]);
 const roleNamesEnum = z.enum(["Read-only", "Contributor", "Administrator"]); 
 
+export const userParamsSchema = z.object({
+    id: z.string().uuid({ message: "Invalid ID format. Must be a UUID." })
+});
+
 export const createUserSchema = z.object({
     username: z.string().min(3, { message: "Username must be at least 3 characters long" }),
     password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
@@ -30,5 +34,6 @@ export const updateUserSchema = z.object({
     }),
 });
 
+export type UserParams = z.infer<typeof userParamsSchema>
 export type UserCreate = z.infer<typeof createUserSchema>
 export type UserUpdate = z.infer<typeof updateUserSchema>
