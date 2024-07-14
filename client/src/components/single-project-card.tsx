@@ -102,7 +102,7 @@ const SingleProject = () => {
     useEffect(() => {
         const fetchProject = async () => {
             try {
-                const response = await axios.get<Project>(`http://localhost:4000/api/projects/${id}`);
+                const response = await axios.get<Project>(`http://localhost:4000/api/projects/${id}`, { withCredentials: true });
                 setProject(response.data);
                 form.reset({
                     project_name: response.data.project_name,
