@@ -47,15 +47,6 @@ export const updateUser = async (
         nationality?: string
     }
 ) => {
-    const data: any = {};
-    if (username !== undefined) data.username = username;
-    if (password !== undefined) data.password = password;
-    if (email !== undefined) data.email = email;
-    if (name !== undefined) data.name = name;
-    if (role_id !== undefined) data.role_id = role_id;
-    if (age !== undefined) data.age = age;
-    if (gender !== undefined) data.gender = gender;
-    if (nationality !== undefined) data.nationality = nationality;
     if (data.role_name) {
         const role = await prisma.role.findUnique({
             where: { role_name: data.role_name },

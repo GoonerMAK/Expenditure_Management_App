@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as permissionService from '../services/permission.service.js';
+import { Permission, PermissionParams } from '../validators/permission.validator.js';
 
-export const createPermission = async (req: Request, res: Response) => {
+export const createPermission = async (req: Request<PermissionParams, unknown, Permission, unknown>, res: Response) => {
     const { permission_name } = req.body;
     try {
         const newPermission = await permissionService.createPermission(permission_name);
@@ -11,7 +12,7 @@ export const createPermission = async (req: Request, res: Response) => {
     }
 };
 
-export const updatePermission = async (req: Request, res: Response) => {
+export const updatePermission = async (req: Request<PermissionParams, unknown, Permission, unknown>, res: Response) => {
     const { id } = req.params;
     const { permission_name } = req.body;
     try {
@@ -26,7 +27,7 @@ export const updatePermission = async (req: Request, res: Response) => {
     }
 };
 
-export const deletePermission = async (req: Request, res: Response) => {
+export const deletePermission = async (req: Request<PermissionParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const deletedPermission = await permissionService.deletePermission(id);
@@ -40,7 +41,7 @@ export const deletePermission = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllPermissions = async (_req: Request, res: Response) => {
+export const getAllPermissions = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const permissions = await permissionService.getAllPermissions();
         res.status(200).json(permissions);
@@ -49,7 +50,7 @@ export const getAllPermissions = async (_req: Request, res: Response) => {
     }
 };
 
-export const getPermissionById = async (req: Request, res: Response) => {
+export const getPermissionById = async (req: Request<PermissionParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const permission = await permissionService.getPermissionById(id);

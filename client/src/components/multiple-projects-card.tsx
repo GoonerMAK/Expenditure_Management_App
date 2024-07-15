@@ -68,7 +68,7 @@ const ShowProjects = () => {
         const categoryIds = fetchedProjects.map(project => project.category_id);
 
         const categoryRequests = categoryIds.map(categoryId =>
-          axios.get<Category>(`http://localhost:4000/api/categories/${categoryId}`)
+          axios.get<Category>(`http://localhost:4000/api/categories/${categoryId}`, { withCredentials: true })
         );
 
         const categoryResponses = await Promise.all(categoryRequests);
@@ -81,7 +81,7 @@ const ShowProjects = () => {
         const userIds = fetchedProjects.map(project => project.created_by_id);
 
         const userRequests = userIds.map(userId =>
-          axios.get<User>(`http://localhost:4000/api/users/${userId}`)
+          axios.get<User>(`http://localhost:4000/api/users/${userId}`, { withCredentials: true })
         );
 
         const userResponses = await Promise.all(userRequests);

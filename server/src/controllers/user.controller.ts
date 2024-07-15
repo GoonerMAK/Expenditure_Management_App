@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/user.service.js';
+import { UserCreate, UserUpdate, UserParams } from '../validators/user.validator.js';
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request<UserParams, unknown, UserCreate, unknown>, res: Response) => {
     const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body;
     try {
         const newUser = await userService.createUser(username, password, email, name, role_id, role_name, age, gender, nationality);
@@ -11,9 +12,9 @@ export const createUser = async (req: Request, res: Response) => {
     }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request<UserParams, unknown, UserUpdate, unknown>, res: Response) => {
     const { id } = req.params;
-    const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body;
+    const { username, password, email, name, role_id, role_name, age, gender, nationality } = req.body.data;
     try {
         const updatedUser = await userService.updateUser(id, username, password, email, name, role_id, role_name, age, gender, nationality);
         if (!updatedUser) {
@@ -26,7 +27,7 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request<UserParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const deletedUser = await userService.deleteUser(id);
@@ -40,7 +41,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllUsers = async (_req: Request, res: Response) => {
+export const getAllUsers = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const users = await userService.getAllUsers();
         res.status(200).json(users);
@@ -49,7 +50,7 @@ export const getAllUsers = async (_req: Request, res: Response) => {
     }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request<UserParams, unknown, unknown, unknown>, res: Response) => {
     const { id } = req.params;
     try {
         const user = await userService.getUserById(id);
@@ -63,7 +64,7 @@ export const getUserById = async (req: Request, res: Response) => {
     }
 };
 
-export const getAllUsernames = async (_req: Request, res: Response) => {
+export const getAllUsernames = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const usernames = await userService.getAllUsernames();
         res.status(200).json(usernames);
@@ -73,7 +74,7 @@ export const getAllUsernames = async (_req: Request, res: Response) => {
     }
 };
 
-export const getUsersWithoutRoles = async (_req: Request, res: Response) => {
+export const getUsersWithoutRoles = async (_req: Request<unknown, unknown, unknown, unknown>, res: Response) => {
     try {
         const getUsersWithoutRoles = await userService.getUsersWithoutRoles();
         res.status(200).json(getUsersWithoutRoles);
