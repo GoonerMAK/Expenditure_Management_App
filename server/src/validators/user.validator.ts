@@ -20,7 +20,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-    id: z.string().uuid({ message: "Invalid user ID" }),
+    id: z.string().uuid({ message: "Invalid user ID" }).optional(),
     data: z.object({
         username: z.string().min(2, { message: "Username must be at least 2 characters long" }).optional(),
         password: z.string().optional(),

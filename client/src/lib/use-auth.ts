@@ -9,9 +9,8 @@ const useAuth = () => {
     const checkAuth = async () => {
       try {
         const response = await axios.get('http://localhost:4000/api/auth/user', { withCredentials: true });
-        console.log('Testing custom hook useAuth:', response.data.user);
-
         setUser(response.data.user);
+        
       } catch (error) {
         setUser(null);
       } finally {
