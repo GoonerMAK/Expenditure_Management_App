@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
-import axios from 'axios';
 import { format } from "date-fns"
+
+import { useGetCategoriesQuery } from '../redux/category-api';
+import { useGetUserAuthQuery } from '../redux/user-api';
+import { useAddProjectMutation } from '../redux/project-api';
 
 import { Check, ChevronsUpDown, CalendarIcon } from "lucide-react"
 import { cn } from '../lib/utils';
@@ -10,33 +13,14 @@ import { Calendar } from './ui/calendar';
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
 
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "../components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "../components/ui/form";
 import { Textarea } from './ui/textarea';
 import { Input } from "./ui/input";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "./ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "./ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "./ui/command"
+import { Popover, PopoverContent, PopoverTrigger, } from "./ui/popover"
 
 
-interface ProjectFormValues {
+interface Project {
     project_name: string;
     description: string;
     category_id: string;
@@ -48,18 +32,15 @@ interface ProjectFormValues {
     updated_at: Date;
 }
 
-interface Category {
-    id: string;
-    category_name: string;
-    created_at: string;
-    updated_at: string;
-}
 
 const AddProjectForm = () => {
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
 
-    const form = useForm<ProjectFormValues>({
+    const { data: categories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery();
+    const { data: userData } = useGetUserAuthQuery();
+    const [addProject] = useAddProjectMutation();
+
+    const form = useForm<Project>({
         defaultValues: {
             project_name: '',
             description: '',
@@ -76,46 +57,23 @@ const AddProjectForm = () => {
     const { setValue, watch } = form;
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get<Category[]>('http://localhost:4000/api/categories', { withCredentials: true });
-                console.log('Fetched categories:', response.data);
-
-                setCategories(response.data);
-            } catch (error) {
-                console.error('Failed to fetch categories:', error);
-            }
-        };
-
-        fetchCategories();
-    }, []);
-
-    useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await axios.get<{ user: { id: string } }>('http://localhost:4000/api/auth/user', { withCredentials: true });
-                console.log('Fetched user:', response.data);
-                setValue('created_by_id', response.data.user.id);
-            } catch (error) {
-                console.error('Failed to fetch current user:', error);
-            }
-        };
-
-        fetchCurrentUser();
-    }, [setValue]);
+        if (userData) {
+            setValue('created_by_id', userData.user.id);
+        }
+    }, [userData, setValue]);
 
 
-    const onSubmit = async (data: ProjectFormValues) => {
+    const onSubmit = async (data: Project) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/projects', data, { withCredentials: true });
-            console.log('Server response:', response.data);
+            const response = await addProject(data).unwrap();
+            console.log('Server response:', response);
 
             toast.success("Project has been created")
             setTimeout(() => {
                 window.location.reload();
             }, 4000);
         } catch (error: any) {
-            console.error('Error response:', error.response);
+            console.error('Error response:', error);
             toast.error("Error creating project")
         }
     };

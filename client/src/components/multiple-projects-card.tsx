@@ -1,51 +1,17 @@
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-interface Project {
-  id: string;
-  project_name: string;
-  description: string;
-  category_id: string;
-  start_date: string;
-  end_date: string;
-  created_by_id: string;
-  created_at: string;
-  updated_at: string;
-}
+import { useGetProjectsQuery } from '../redux/project-api';
+import { useGetUsersQuery } from '../redux/user-api';
 
-interface Category {
-  id: string;
-  category_name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface User {
-  id: string;
-  username: string;
-  password: string;
-  email: string;
-  name: string;
-  age: number | null;
-  gender: string | null;
-  nationality: string | null;
-  role_id: string;
-  created_at: string;
-  updated_at: string;
-}
 
 const ShowProjects = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [categories, setCategories] = useState<{ [key: string]: Category }>({});
-  const [users, setUsers] = useState<{ [key: string]: User }>({});
-
-  const [loading, setLoading] = useState(true);
+  const { data: projects = [], isLoading: projectsLoading } = useGetProjectsQuery();
+  const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
 
 
-  function formatDate(dateString: string | undefined | null) {
+  function formatDate(dateString: Date | undefined | null) {
     if (!dateString) return 'Not specified';
   
     const options: Intl.DateTimeFormatOptions = { 
@@ -57,55 +23,11 @@ const ShowProjects = () => {
   
     return date.toLocaleDateString('en-GB', options);
   }
-    
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get<Project[]>('http://localhost:4000/api/projects', { withCredentials: true });
-        const fetchedProjects = response.data;
-
-        const categoryIds = fetchedProjects.map(project => project.category_id);
-
-        const categoryRequests = categoryIds.map(categoryId =>
-          axios.get<Category>(`http://localhost:4000/api/categories/${categoryId}`, { withCredentials: true })
-        );
-
-        const categoryResponses = await Promise.all(categoryRequests);
-        const fetchedCategories = categoryResponses.reduce((acc, response) => {
-          acc[response.data.id] = response.data;
-          return acc;
-        }, {} as { [key: string]: Category });
-
-
-        const userIds = fetchedProjects.map(project => project.created_by_id);
-
-        const userRequests = userIds.map(userId =>
-          axios.get<User>(`http://localhost:4000/api/users/${userId}`, { withCredentials: true })
-        );
-
-        const userResponses = await Promise.all(userRequests);
-        const fetchedUsers = userResponses.reduce((acc, response) => {
-          acc[response.data.id] = response.data;
-          return acc;
-        }, {} as { [key: string]: User });
-
-        setProjects(fetchedProjects);
-        setCategories(fetchedCategories);
-        setUsers(fetchedUsers);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
-
-  if (loading) {
+  if (projectsLoading || usersLoading) {
     return <div>Loading...</div>;
   }
+
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
@@ -142,10 +64,10 @@ const ShowProjects = () => {
               <h3 className="text-lg font-semibold">{project.project_name}</h3>
               <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
               <p className="text-sm text-muted-foreground">
-                Category: {categories[project.category_id]?.category_name || 'Loading...'}
+                Category: {project.category_name || 'Loading...'}
               </p>
               <p className="text-sm text-muted-foreground">
-                Created by: {users[project.created_by_id]?.name || 'Loading...'}
+                Created by: {users.find(user => user.id === project.created_by_id)?.name || 'Loading...'}
               </p>
               <p className="text-sm text-muted-foreground">
                 Start Date: {formatDate(project.start_date)}

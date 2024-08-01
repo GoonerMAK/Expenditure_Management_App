@@ -9,8 +9,6 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, allowedRoles  }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   
-  console.log('User found in protected route component? ---', user);
-
   if (loading) {
     return <div>Loading...</div>;
   }

@@ -1,78 +1,41 @@
-import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
-import axios from 'axios';
+import { useGetCategoriesQuery, useAddCategoryMutation } from '../redux/category-api';
 
 import { Button } from "../components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../components/ui/form";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "../components/ui/form";
+import {Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow, } from "../components/ui/table";
 import { Input } from "../components/ui/input";
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
 
 
-interface CategoryFormValues {
-  category_name: string;
-}
-
 interface Category {
-  id: string;
+  id?: string;
   category_name: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const AddCategoryForm = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categories = [], refetch } = useGetCategoriesQuery();
+  const [addCategory, { isLoading }] = useAddCategoryMutation();
 
-  const form = useForm<CategoryFormValues>({
+  const form = useForm<Category>({
     defaultValues: {
       category_name: '',
     },
   });
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get<Category[]>('http://localhost:4000/api/categories', { withCredentials: true });
-        setCategories(response.data);
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  const onSubmit = async (data: CategoryFormValues) => {
+  const onSubmit = async (data: Category) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/categories', data, { withCredentials: true });
-      console.log('Server response:', response.data);
-      setCategories(prevCategories => [...prevCategories, response.data]); 
-
+      const response = await addCategory(data).unwrap();
+      console.log('Server response:', response);
       toast.success('Successfully created Category');
-      setTimeout(() => {
-        window.location.reload();
-      }, 4000);
+      refetch();
     } catch (error: any) {
-      console.error('Error response:', error.response);
-      toast.error('Error Creating Category');
+      console.error('Error response:', error);
+      const errorMessage = error?.data?.message || "Failed to create Category";
+      toast.error(`Error: ${errorMessage}`);
     }
   };
 
@@ -98,7 +61,7 @@ const AddCategoryForm = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={isLoading}>Submit</Button>
           </form>
         </Form>
       </div>

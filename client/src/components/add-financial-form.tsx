@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import axios from 'axios';
+import { useAddFinancialDataMutation } from '../redux/financial-data-api';
+import { useGetProjectsQuery } from '../redux/project-api';
 import { format } from "date-fns"
 
 import { Check, ChevronsUpDown, CalendarIcon } from "lucide-react"
@@ -9,31 +11,11 @@ import { Button } from "../components/ui/button";
 import { Calendar } from './ui/calendar';
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
-
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "../components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "../components/ui/form";
 import { Textarea } from './ui/textarea';
 import { Input } from "./ui/input";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "./ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "./ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "./ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 
 
 interface FinancialData {
@@ -46,22 +28,10 @@ interface FinancialData {
     project_name: string;
 }
 
-interface Project {
-    id: string;
-    project_name: string;
-    description: string;
-    category_id: string;
-    category_name: string;
-    start_date: Date;
-    end_date: Date;
-    created_by_id: string;
-    created_at: Date;
-    updated_at: Date;
-}
-
 
 const AddFinancialForm = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
+    const { data: projects = [], error, isLoading } = useGetProjectsQuery();
+    const [addFinancialData] = useAddFinancialDataMutation();
 
     const form = useForm<FinancialData>({
         defaultValues: {
@@ -79,19 +49,11 @@ const AddFinancialForm = () => {
     const { setValue, handleSubmit } = form;
 
     useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await axios.get<Project[]>('http://localhost:4000/api/projects', { withCredentials: true });
-                console.log('Fetched projects:', response.data);
-                setProjects(response.data);
-            } catch (error) {
-                console.error('Failed to fetch projects:', error);
-                toast.error('Failed to fetch projects');
-            }
-        };
-
-        fetchProjects();
-    }, []);
+        if (error) {
+            console.error('Failed to fetch projects:', error);
+            toast.error('Failed to fetch projects');
+        }
+    }, [error]);
 
 
     const onSubmit = async (data: FinancialData) => {
@@ -103,7 +65,7 @@ const AddFinancialForm = () => {
                 return;
             }
 
-            const response = await axios.post('http://localhost:4000/api/financialData', {
+            await addFinancialData({
                 year: parseInt(data.year.toString()),
                 month: parseInt(data.month.toString()),
                 expenditure: parseFloat(data.expenditure.toString()),
@@ -111,15 +73,14 @@ const AddFinancialForm = () => {
                 revised_budget: parseFloat(data.revised_budget.toString()),
                 project_id: data.project_id,
                 project_name: data.project_name
-            }, { withCredentials: true });
+            }).unwrap();
 
-            console.log('Financial data added successfully:', response.data);
             toast.success('Financial data added successfully');
             setTimeout(() => {
                 window.location.reload();
             }, 4000);
         } catch (error: any) {
-            console.error('Failed to add financial data:', error.response?.data ?? error.message);
+            console.error('Failed to add financial data:', error);
             toast.error('Failed to add financial data');
         }
     };
