@@ -3,49 +3,21 @@ import { useForm } from "react-hook-form";
 import axios from 'axios';
 
 import { Button } from "../components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../components/ui/form";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible"
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./ui/popover";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "../components/ui/form";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger, } from "./ui/collapsible"
+import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow, } from "../components/ui/table";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "./ui/command"
+import { Popover, PopoverContent, PopoverTrigger, } from "./ui/popover";
 import { Check, ChevronsUpDown, CalendarIcon } from "lucide-react"
 import { cn } from '../lib/utils';
 
 import { Input } from "../components/ui/input";
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
+
+import {useGetRolesQuery, useAddRoleMutation, useGetUsersByRolesQuery, useGetAssignedRolesByUserIdQuery, useGetUnassignedRolesByUserIdQuery}  from '../redux/role-api';
+import { useGetUsernamesQuery, useUpdateUserMutation } from '../redux/user-api';
+
 
 interface Role {
   id: string;
@@ -68,6 +40,9 @@ const UserRoles = () => {
   const [assignedRoles, setAssignedRoles] = useState<Role[]>([]);
   const [usernames, setUsernames] = useState<Username[]>([]);
   const [rolesWithUsers, setRolesWithUsers] = useState<RoleWithUsers[]>([]);
+
+  const [selectedUserIdAssign, setSelectedUserIdAssign] = useState<string>("");
+  const [selectedUserIdRevoke, setSelectedUserIdRevoke] = useState<string>("");
 
   const [openUsernameAssign, setOpenUsernameAssign] = useState(false);
   const [openRoleAssign, setOpenRoleAssign] = useState(false);
@@ -96,7 +71,6 @@ const UserRoles = () => {
       id: '',
       username: '',
       role_name: '',
-
     },
     mode: 'onSubmit',
   });
@@ -109,102 +83,69 @@ const UserRoles = () => {
   const { setValue: setSelectRoleValueRevoke } = selectRoleFormRevoke;
   const { setValue: setSelectUsernameRevoke } = selectRoleFormRevoke;
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await axios.get<Role[]>('http://localhost:4000/api/roles', { withCredentials: true });
-        console.log(response.data);
-        setRoles(response.data);
-      } catch (error) {
-        console.error('Failed to fetch roles:', error);
-      }
-    };
+  
+  const { data: rolesData, refetch: refetchRoles } = useGetRolesQuery();
+  const { data: rolesWithUsersData, refetch: refetchRolesWithUsers } = useGetUsersByRolesQuery();
+  const { data: usernamesData, refetch: refetchUsernames } = useGetUsernamesQuery();
 
-    const fetchRolesWithUsers = async () => {
-      try {
-        const response = await axios.get<string[][]>('http://localhost:4000/api/roles/users/by-role', { withCredentials: true });
-        const formattedResponse = response.data.map(roleArray => ({
-          role_name: roleArray[0],
-          users: roleArray.slice(1),
-        }));
-        setRolesWithUsers(formattedResponse);
-      } catch (error) {
-        console.error('Failed to fetch roles with users:', error);
-      }
-    };
+  const [addRole] = useAddRoleMutation();
+  const [updateUser] = useUpdateUserMutation();
 
-    const fetchUsernames = async () => {
-      try {
-        const response = await axios.get<Username[]>('http://localhost:4000/api/users/usernames', { withCredentials: true });
-        console.log(response.data);
-        setUsernames(response.data);
-      } catch (error) {
-        console.error('Failed to fetch usernames:', error);
-
-      }
-    };
-
-    fetchRoles();
-    fetchRolesWithUsers();
-    fetchUsernames();
-  }, []);
-
+  const { data: unassignedRolesData } = useGetUnassignedRolesByUserIdQuery(selectedUserIdAssign);
+  const { data: assignedRolesData } = useGetAssignedRolesByUserIdQuery(selectedUserIdRevoke);
+ 
 
   useEffect(() => {
-    if (selectRoleFormAssign.getValues("username")) {
-      fetchUnassignedRoles(selectRoleFormAssign.getValues("username"));
+    if (rolesData) {
+      console.log('Fetched Roles Data:', rolesData);
+      setRoles(rolesData);
     }
-  }, [selectRoleFormAssign.getValues("username")]);
+    if (usernamesData) {
+      console.log('Fetched Usernames Data:', usernamesData);
+      setUsernames(usernamesData);
+    }
+    if (rolesWithUsersData) {
+      console.log('Fetched Roles With Users Data:', rolesWithUsersData);
+      const transformedRolesWithUsers = rolesWithUsersData.map(roleWithUsers => {
+        return {
+          role_name: roleWithUsers[0], 
+          users: roleWithUsers.slice(1) 
+        };
+      });
+      setRolesWithUsers(transformedRolesWithUsers);
+    }
+  }, [rolesData, usernamesData, rolesWithUsersData]);
 
   useEffect(() => {
-    if (selectRoleFormRevoke.getValues("username")) {
-      fetchAssignedRoles(selectRoleFormRevoke.getValues("username"));
-    }
-  }, [selectRoleFormRevoke.getValues("username")]);
+    if (unassignedRolesData) setUnassignedRoles(unassignedRolesData);
+    console.log('Fetched Unassigned Roles Data:', unassignedRolesData);
+  }, [unassignedRolesData]);
 
-
-  const fetchUnassignedRoles = async (username: string) => {
-    try {
-      const selectedUser = usernames.find(user => user.username === username);
-      if (selectedUser) {
-        const response = await axios.get<Role[]>(`http://localhost:4000/api/roles/unassigned/${selectedUser.id}`, { withCredentials: true });
-        console.log("Selected for role assignment", response.data);
-        setUnassignedRoles(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch unassigned roles:', error);
+  useEffect(() => {
+    if (Array.isArray(assignedRolesData)) {
+      setAssignedRoles(assignedRolesData);
+    } else if (assignedRolesData) {
+      setAssignedRoles([assignedRolesData]);
+    } else {
+      setAssignedRoles([]);
     }
-  };
+  }, [assignedRolesData]);
 
-  const fetchAssignedRoles = async (username: string) => {
-    try {
-      const selectedUser = usernames.find(user => user.username === username);
-      if (selectedUser) {
-        const response = await axios.get<Role[]>(`http://localhost:4000/api/roles/assigned/${selectedUser.id}`, { withCredentials: true });
-        console.log("Selected for role assignment", response.data);
-        setAssignedRoles(Array.isArray(response.data) ? response.data : [response.data]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch assigned roles:', error);
-    }
-  };
 
   const onAddRoleSubmit = async (data: Role) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/roles', data, { withCredentials: true });
-      console.log('Server response:', response.data);
-      setRoles(prevRoles => [...prevRoles, response.data]);
-
-
+      await addRole(data).unwrap();
+      refetchRoles();
       toast.success('Successfully created Role');
       setTimeout(() => {
         window.location.reload();
       }, 3000);
     } catch (error: any) {
-      toast.error('Error Creating Role');
-      console.error('Error response:', error.response.data.message);
+      toast.error('Error Creating Role ' + error);
+      console.error('Error response:', error);
     }
   };
+
 
   const onSelectRoleSubmitAssign = async (data: Role & Username) => {
     try {
@@ -222,18 +163,26 @@ const UserRoles = () => {
       console.log('Selected User ID:', selectedUser.id);
       console.log('Selected Role:', data.role_name);
 
-      const response = await axios.put(`http://localhost:4000/api/users/${selectedUser.id}`, { role_id: selectedRole.id, role_name: data.role_name, }, { withCredentials: true });
-  
-      console.log('Server response:', response.data);
+      const payload = {
+        data: {
+          role_id: selectedRole.id,
+          role_name: data.role_name
+        }
+      };
+
+      await updateUser({ id: selectedUser.id, data: payload }).unwrap();
+      refetchRolesWithUsers();
+
       toast.success('Role assigned successfully');
       setTimeout(() => {
         window.location.reload(); 
-      }, 3000);
+      }, 2000);
     } catch (error: any) {
       toast.error('Error assigning role');
-      console.error('Error response:', error.response?.data.message);
+      console.error('Error response:', error);
     }
   };
+
 
   const onSelectRoleSubmitRevoke = async (data: Role & Username) => {
     try {
@@ -245,16 +194,21 @@ const UserRoles = () => {
 
       console.log('Selected User ID:', selectedUser.id);
 
-      const response = await axios.put(`http://localhost:4000/api/users/${selectedUser.id}`, { role_name: "Read-only" }, { withCredentials: true });
+      const payload = {
+        data: {
+          role_name: "Read-only"
+        }
+      };
+
+      await updateUser({ id: selectedUser.id, data: payload }).unwrap();
   
-      console.log('Server response:', response.data);
       toast.success('Role revoked successfully');
       setTimeout(() => {
         window.location.reload(); 
       }, 3000);
     } catch (error: any) {
       toast.error('Error revoking role');
-      console.error('Error response:', error.response?.data.message);
+      console.error('Error response:', error);
     }
   };
 
@@ -330,6 +284,7 @@ const UserRoles = () => {
                                   const selectedUsername = usernames.find(u => u.username === currentValue);
                                   if (selectedUsername) {
                                     setSelectUsernameAssign("username", selectedUsername.username); 
+                                    setSelectedUserIdAssign(selectedUsername.id);
                                     setSelectRoleValueAssign("role_name", ""); 
                                   }
                                   setOpenUsernameAssign(false);
@@ -457,6 +412,7 @@ const UserRoles = () => {
                                   const selectedUsername = usernames.find(u => u.username === currentValue);
                                   if (selectedUsername) {
                                     setSelectUsernameRevoke("username", selectedUsername.username);
+                                    setSelectedUserIdRevoke(selectedUsername.id);
                                     setSelectRoleValueRevoke("role_name", "");
                                   }
                                   setOpenUsernameRevoke(false);
@@ -509,7 +465,7 @@ const UserRoles = () => {
                         <CommandList>
                           {assignedRoles.length === 0 && <CommandEmpty>No Roles found</CommandEmpty>}
                           <CommandGroup>
-                            {assignedRoles.map((role) => (
+                            {assignedRoles.map((role)  => (
                               <CommandItem
                                 key={role.id}
                                 value={role.role_name}
@@ -571,7 +527,7 @@ const UserRoles = () => {
                           <TableHead className="text-center text-s">List of users under this role</TableHead>
                           {rolesWithUsers.find(r => r.role_name === role.role_name)?.users.map(user => (
                             <TableCell className="py-1" key={user}>{user}</TableCell>
-                          ))}
+                          )) || <TableCell className="py-1">No users found</TableCell>}
                         </TableRow>
                       </TableBody>
                       <br></br>

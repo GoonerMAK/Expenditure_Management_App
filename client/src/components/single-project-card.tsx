@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import { useForm } from "react-hook-form";
 import { format } from "date-fns"
+import useAuth from '../lib/use-auth';
 
 import { Check, ChevronsUpDown, CalendarIcon } from "lucide-react"
 import { cn } from '../lib/utils';
@@ -10,56 +10,34 @@ import { Button } from "../components/ui/button";
 import { Calendar } from './ui/calendar';
 import { toast } from "sonner";
 import { Toaster } from './ui/sonner';
-import useAuth from '../lib/use-auth';
 
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "../components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "../components/ui/form";
 import { Textarea } from './ui/textarea';
 import { Input } from "./ui/input";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "./ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "./ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from "./ui/command"
+import { Popover, PopoverContent, PopoverTrigger, } from "./ui/popover"
 
+import { useGetProjectByIdQuery, useUpdateProjectMutation } from '../redux/project-api';
+import { useGetCategoriesQuery } from '../redux/category-api';
+import { useGetFinancialDataByIdQuery, useUpdateFinancialDataMutation } from '../redux/financial-data-api';
+import { useGetUserAuthQuery } from '../redux/user-api';
 
 
 interface Project {
-    id: string;
+    id?: string;
     project_name: string;
     description: string;
     category_id: string;
     category_name: string;
     start_date: string;
     end_date: string;
-    created_by_id: string;
-    created_at: string;
-    updated_at: string;
-}
-
-interface Category {
-    id: string;
-    category_name: string;
-    created_at: string;
-    updated_at: string;
+    created_by_id?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 interface FinancialData {
+    id?: string;
     year: number;
     month: number;
     expenditure: number;
@@ -70,14 +48,18 @@ interface FinancialData {
 
 const SingleProject = () => {
     const { id } = useParams<{ id: string }>();
-    const [project, setProject] = useState<Project | null>(null);
-    const [financialData, setFinancialData] = useState<FinancialData | null>(null);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [editMode, setEditMode] = useState(false);
-    const [open, setOpen] = useState(false)
     const { user } = useAuth();
 
+    const [editMode, setEditMode] = useState(false);
+    const [open, setOpen] = useState(false)
+    
+    const { data: project, error: projectError, isLoading: projectLoading } = useGetProjectByIdQuery(id!);
+    const { data: financialData, error: financialDataError, isLoading: financialDataLoading } = useGetFinancialDataByIdQuery(id!);
+    const { data: categories } = useGetCategoriesQuery();
+    const { data: authUser } = useGetUserAuthQuery();
+
+    const [updateProject] = useUpdateProjectMutation();
+    const [updateFinancialData] = useUpdateFinancialDataMutation();
 
 
     const form = useForm<Project & FinancialData>({
@@ -88,6 +70,7 @@ const SingleProject = () => {
             category_name: '',
             start_date: '',
             end_date: '',
+
             year: 0,
             month: 0,
             expenditure: 0,
@@ -100,111 +83,74 @@ const SingleProject = () => {
 
 
     useEffect(() => {
-        const fetchProject = async () => {
-            try {
-                const response = await axios.get<Project>(`http://localhost:4000/api/projects/${id}`, { withCredentials: true });
-                setProject(response.data);
-                form.reset({
-                    project_name: response.data.project_name,
-                    description: response.data.description,
-                    category_name: response.data.category_name, 
-                    start_date: new Date(response.data.start_date).toISOString(), 
-                    end_date: new Date(response.data.end_date).toISOString(), 
-                });
-            } catch (error) {
-                console.error('Failed to fetch project:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProject();
-    }, [id, form]);
-
+        if (project) {
+            form.reset({
+                project_name: project.project_name,
+                description: project.description,
+                category_name: project.category_name,
+                start_date: new Date(project.start_date).toISOString(),
+                end_date: new Date(project.end_date).toISOString(),
+            });
+        }
+    }, [project, form]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get<Category[]>('http://localhost:4000/api/categories', { withCredentials: true });
-                setCategories(response.data);
-            } catch (error) {
-                console.error('Failed to fetch categories:', error);
-            }
-        };
-
-        fetchCategories();
-    }, []);
-
+        if (authUser) {
+            setValue('created_by_id', authUser.user.id);
+        }
+    }, [authUser, setValue]);
 
     useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await axios.get<{ user: { id: string } }>('http://localhost:4000/api/auth/user', { withCredentials: true });
-                console.log('Fetched user:', response.data);
-                setValue('created_by_id', response.data.user.id);
-            } catch (error) {
-                console.error('Failed to fetch current user:', error);
-            }
-        };
-
-        fetchCurrentUser();
-    }, [setValue]);
-
-
-    useEffect(() => {
-        const fetchFinancialData = async () => {
-            try {
-                const response = await axios.get<FinancialData>(`http://localhost:4000/api/financialData/${id}`, { withCredentials: true });
-                setFinancialData(response.data);
-                form.reset({
-                    year: response.data.year,
-                    month: response.data.month,
-                    expenditure: response.data.expenditure, 
-                    initial_budget: response.data.initial_budget, 
-                    revised_budget: response.data.revised_budget, 
-                });
-            } catch (error) {
-                console.error('Failed to fetch financial data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFinancialData();
-    }, [id, form]);
-
+        if (financialData) {
+            form.reset({
+                year: financialData.year,
+                month: financialData.month,
+                expenditure: financialData.expenditure,
+                initial_budget: financialData.initial_budget,
+                revised_budget: financialData.revised_budget,
+            });
+        }
+    }, [financialData, form]);
 
 
     const onSubmit = async (data: Project & FinancialData) => {
+        const projectData: Partial<Project> = {
+            project_name: data.project_name,
+            description: data.description,
+            category_id: data.category_id,
+            category_name: data.category_name,
+            start_date: data.start_date,
+            end_date: data.end_date,
+        };
+    
+        const financialData: Partial<FinancialData> = {
+            year: parseInt(data.year.toString(), 10),
+            month: parseInt(data.month.toString(), 10),
+            expenditure: parseFloat(data.expenditure.toString()),
+            initial_budget: parseFloat(data.initial_budget.toString()),
+            revised_budget: parseFloat(data.revised_budget.toString())
+        };
+
         try {
-            await axios.put(`http://localhost:4000/api/projects/${id}`, data, { withCredentials: true });
-
-            const financialDataToSend = {
-                year: parseInt(data.year.toString(), 10),
-                month: parseInt(data.month.toString(), 10),
-                expenditure: parseFloat(data.expenditure.toString()),
-                initial_budget: parseFloat(data.initial_budget.toString()),
-                revised_budget: parseFloat(data.revised_budget.toString())
-            };
-
-            console.log('Financial data being sent:', financialDataToSend);
-
-            await axios.put(`http://localhost:4000/api/financialData/${id}`, financialDataToSend, { withCredentials: true });
-
+            await Promise.all([
+                updateProject({ id: id!, data: projectData }).unwrap(),
+                updateFinancialData({ id: id!, data: financialData }).unwrap(),
+            ]);
             toast.success('Project updated successfully');
-
         } catch (error) {
             toast.error('Failed to update project');
+            console.log("The error ", error)
         }
     };
 
-    if (loading) {
+    if (projectLoading || financialDataLoading) {
         return <div>Loading...</div>;
     }
 
-    if (!project) {
-        return <div>Project not found</div>;
+    if (projectError || financialDataError) {
+        return <div>Error loading project</div>;
     }
+
 
     const startDate = watch("start_date");
     const canEdit = user?.role_name !== "Read-only";
@@ -282,9 +228,9 @@ const SingleProject = () => {
                                             <Command>
                                                 <CommandInput placeholder="Search Category..." />
                                                 <CommandList>
-                                                    {categories.length === 0 && <CommandEmpty>No Category found</CommandEmpty>}
+                                                    {categories && categories.length === 0 && <CommandEmpty>No Category found</CommandEmpty>}
                                                     <CommandGroup>
-                                                        {categories.map((category) => (
+                                                        {categories && categories.map((category) => (
                                                             <CommandItem
                                                                 key={category.id}
                                                                 value={category.category_name}
