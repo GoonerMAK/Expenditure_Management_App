@@ -11,7 +11,7 @@ import { roleRouter } from './routes/role.route.js'
 import { userRouter } from './routes/user.route.js'
 import { authRouter } from './routes/auth.routes.js';
 
-const app = express()
+export const app = express()
 dotenv.config();
 
 app.use(cors({
@@ -32,7 +32,6 @@ app.use('/api', userRouter);
 app.use('/api/auth', authRouter);
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
