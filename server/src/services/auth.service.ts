@@ -69,6 +69,10 @@ export const getAuthenticatedUser = async (
     try {
       const user = await authRepository.getUserById(userId);
 
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
       return user;
     } catch (error) {
       throw new Error('Failed to get user information');

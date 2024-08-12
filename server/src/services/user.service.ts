@@ -68,7 +68,7 @@ export const updateUser = async (
 
         return updatedUser;
     } catch (error) {
-        throw new Error(`Failed to update user:  ${error.message}`);
+        throw new Error(`Failed to update user: ${error.message}`);
     }
 };
 
@@ -119,6 +119,6 @@ export const getUsersWithoutRoles = async () => {
         const usersWithoutRoles = await userRepository.getUsersWithoutRoles();
         return usersWithoutRoles;
     } catch (error) {
-        throw new Error(`Failed to fetch users: ${error.message}`);
+        throw new Error(`Failed to fetch users without roles: ${error.message}`);
     }
 }
