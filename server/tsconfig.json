@@ -5,7 +5,9 @@
     "moduleResolution": "NodeNext",                     /* Specify how TypeScript looks up a file from a given module specifier. */
     "sourceMap": true,                                /* Create source map files for emitted JavaScript files. */
     "outDir": "dist",                                   /* Specify an output folder for all emitted files. */
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true,                             /* Enables emit interoperability between CommonJS and ES Modules via the `__importStar` and `__importDefault` helpers. */
+    "types": ["jest"],
   },
   "include": ["src/**/*"],
 
