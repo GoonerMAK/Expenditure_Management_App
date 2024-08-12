@@ -7,7 +7,7 @@
     "outDir": "dist",                                   /* Specify an output folder for all emitted files. */
     "skipLibCheck": true,
     "esModuleInterop": true,                             /* Enables emit interoperability between CommonJS and ES Modules via the `__importStar` and `__importDefault` helpers. */
-    
+    "types": ["jest"],
   },
   "include": ["src/**/*"],
 

@@ -1,5 +1,5 @@
 import supertest from "supertest";
-import { app, server } from "../src/index";
+import { app, server } from "../../src/index";
 import jwt from 'jsonwebtoken';
 
 const request = supertest(app);
@@ -13,8 +13,8 @@ describe("---------------- user auth routes ----------------", () => {
         token = jwt.sign({ id: "test-user-id" }, process.env.SECRET, { expiresIn: '1h' });
     });
 
-    afterAll((done) => {
-        server.close(done);
+    afterAll(async () => {
+        await server.close();
     });
 
 
@@ -22,7 +22,6 @@ describe("---------------- user auth routes ----------------", () => {
 
         it("should create a new user and return success code 201", async () => {
             const response = await request.post('/api/auth/signup')
-                .set('Cookie', `jwt=${token}`)
                 .send({
                     email: "testuser@example.com",
                     password: "password123",
@@ -31,12 +30,14 @@ describe("---------------- user auth routes ----------------", () => {
 
             expect(response.status).toBe(201);
             expect(response.body).toHaveProperty('user');
+            
             createdUserId = response.body.user.id;
+
+            token = jwt.sign({ id: createdUserId }, process.env.SECRET, { expiresIn: '1h' });
         });
 
         it("should return 400 for invalid request body", async () => {
             const response = await request.post('/api/auth/signup')
-                .set('Cookie', `jwt=${token}`)
                 .send({});
             expect(response.status).toBe(400);
         });
@@ -47,7 +48,6 @@ describe("---------------- user auth routes ----------------", () => {
 
         it("should log in the user and return success code 200", async () => {
             const response = await request.post('/api/auth/login')
-                .set('Cookie', `jwt=${token}`)
                 .send({
                     email: "testuser@example.com",
                     password: "password123"
@@ -60,22 +60,11 @@ describe("---------------- user auth routes ----------------", () => {
 
         it("should return 400 for invalid credentials", async () => {
             const response = await request.post('/api/auth/login')
-                .set('Cookie', `jwt=${token}`)
                 .send({
                     email: "wrong@example.com",
                     password: "wrongpassword"
                 });
             expect(response.status).toBe(400);
-        });
-    });
-
-
-    describe("POST /api/auth/logout", () => {
-
-        it("should log out the user and return success code 200", async () => {
-            const response = await request.post('/api/auth/logout').set('Cookie', `jwt=${token}`);
-            expect(response.status).toBe(200);
-            expect(response.body.message).toBe('Logged out successfully');
         });
     });
 
@@ -94,7 +83,7 @@ describe("---------------- user auth routes ----------------", () => {
         });
     });
 
-
+    
     describe("PUT /api/users/:id", () => {
 
         it("should update an existing user and return success code 200", async () => {
@@ -197,7 +186,18 @@ describe("---------------- user auth routes ----------------", () => {
         });
     });
 
+
+    /* -------------------------- Logging out the user -------------------------- */
+    describe("POST /api/auth/logout", () => {
+
+        it("should log out the user and return success code 200", async () => {
+            const response = await request.post('/api/auth/logout');
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe('Logged out successfully');
+        });
+    });
     
+
     /* -------------------------- Delete the user -------------------------- */
     describe("DELETE /api/users/:id", () => {
 

@@ -1,5 +1,5 @@
 import supertest from "supertest";
-import { app, server } from "../src/index";
+import { app, server } from "../../src/index";
 import jwt from 'jsonwebtoken';
 
 const request = supertest(app);
@@ -13,8 +13,8 @@ describe("---------------- role routes ----------------", () => {
         token = jwt.sign({ id: "test-user-id" }, process.env.SECRET, { expiresIn: '1h' });
     });
 
-    afterAll((done) => {
-        server.close(done);
+    afterAll(async () => {
+        await server.close();
     });
 
 

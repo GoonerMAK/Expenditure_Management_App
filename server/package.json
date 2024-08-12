@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "tsc --watch",
-    "test": "jest",
+    "test": "jest --maxWorkers=1",
     "build": "tsc",
     "dev": "node dist/index.js"
   },
